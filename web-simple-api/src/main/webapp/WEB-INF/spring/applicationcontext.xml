@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+
+                             http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+
+    <context:component-scan base-package="com.letv.service"/>
+
+
+    <context:annotation-config/>
+
+    <context:property-placeholder location="classpath:db.properties" />
+
+
+
+    <bean name="userTransactionManager"
+          class="me.hengdao.support.MultiDataSourceTransactionManager">
+    </bean>
+
+    <tx:advice id="userTxAdvice" transaction-manager="userTransactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="NOT_SUPPORTED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <!-- UserService事务管理 -->
+        <aop:pointcut id="userServiceOperation"
+                      expression="execution(* com.letv.service..*Service.*(..))"/>
+
+        <aop:advisor advice-ref="userTxAdvice" pointcut-ref="userServiceOperation" />
+    </aop:config>
+
+
+    <!-- 配置c3p0数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+    </bean>
+
+
+    <bean id="dataSourceSlave" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="user" value="${jdbc.slave.user}"></property>
+        <property name="password" value="${jdbc.slave.password}"></property>
+        <property name="driverClass" value="${jdbc.slave.driverClass}"></property>
+        <property name="jdbcUrl" value="${jdbc.slave.jdbcUrl}"></property>
+        <property name="initialPoolSize" value="${jdbc.slave.initialPoolSize}"></property>
+        <property name="maxPoolSize" value="${jdbc.slave.maxPoolSize}"></property>
+    </bean>
+
+
+    <!-- 在使用mybatis时 spring使用sqlsessionFactoryBean 来管理mybatis的sqlsessionFactory-->
+    <!-- 创建sqlsessionFactory 并指定数据源  -->
+    <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+        <!--<property name="dataSource">-->
+            <!--<ref bean="dataSource"/>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <bean id="sqlSessionFactory"
+          class="me.hengdao.support.SqlSessionFactoryBean">
+        <property name="mainDataSource" ref="dataSource" />
+        <property name="shardDataSourceList">
+            <util:list>
+                <ref bean="dataSource" />
+                <ref bean = "dataSourceSlave"/>
+            </util:list>
+        </property>
+        <property name="mapperLocations">
+            <array>
+                <value>classpath:mappers/user-mapper.xml</value>
+            </array>
+        </property>
+        <property name="shardStrategy">
+            <map>
+                <entry key="Shard-User">
+                    <value>com.letv.strategy.TestStrategy</value>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+
+
+    <bean id="testDao" class="com.letv.dao.impl.TestDaoImpl">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+
+
+
+
+
+
+
+
+
+
+</beans>

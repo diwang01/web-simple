@@ -1,0 +1,48 @@
+<configuration debug="false">
+
+    <appender name="logger" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>./logs/websimple_%d{yyyyMMdd}.log</FileNamePattern>
+            <MaxHistory>3</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%d{HH:mm:ss} %level [%logger{10}.%M:%L] %msg%n</Pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+
+    <appender name="perfmancelogger" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>./logs/websimple_perfmance_%d{yyyyMMdd}.log</FileNamePattern>
+            <MaxHistory>3</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <Pattern>%d{HH:mm:ss} %level [%logger{10}.%M:%L] %msg%n</Pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%d{HH:mm:ss} %level [%logger{10}.%M:%L] %msg%n</Pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="CoalescingStatistics" class="org.perf4j.logback.AsyncCoalescingStatisticsAppender">
+        <param name="TimeSlice" value="30000"/>
+        <appender-ref ref="perfmancelogger"/>
+    </appender>
+
+    <logger name="org.perf4j.logger"  level="info" additivity="false">
+        <appender-ref ref="CoalescingStatistics" />
+    </logger>
+
+
+    <root level="warn">
+        <!--<appender-ref ref="logger" />-->
+        <appender-ref ref="Console" />
+    </root>
+</configuration>

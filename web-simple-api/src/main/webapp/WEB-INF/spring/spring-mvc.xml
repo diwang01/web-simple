@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/aop
+                            http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="exceptionResolver" class="com.letv.resovler.ExceptionResolver"/>
+
+    <!-- 文件解析-->
+    <context:component-scan base-package="com.letv.controller"/>
+
+
+    <!-- 使静态文件可以直接访问 -->
+    <mvc:resources location="/static/" mapping="/static/**"/>
+    <mvc:resources location="*.ico" mapping="/**"/>
+
+    <!-- 代替下面的两行代码 -->
+    <mvc:annotation-driven/>
+
+
+    <mvc:interceptors>
+        <!-- 性能拦截器 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/static/**"/>
+            <bean class="com.letv.interceptor.PerformanceInterceptor"/>
+        </mvc:interceptor>
+
+        <!-- antispam拦截器 -->
+        <!--<mvc:interceptor>-->
+            <!--<mvc:mapping path="/**"/>-->
+            <!--<mvc:exclude-mapping path="/static/**"/>-->
+            <!--<bean class="com.letv.interceptor.TokenInterceptor"/>-->
+        <!--</mvc:interceptor>-->
+
+    </mvc:interceptors>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=""/>
+        <!--可为空,方便实现自已的依据扩展名来选择视图解释类的逻辑 -->
+        <property name="viewClass"
+                  value="org.springframework.web.servlet.view.JstlView"/>
+    </bean>
+
+
+</beans>
