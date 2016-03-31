@@ -25,10 +25,8 @@
     </listener>
 
     <listener>
-        <listener-class>org.springframework.web.context.request.RequestContextListener </listener-class>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
-
-
 
 
     <servlet>
@@ -45,7 +43,6 @@
         <servlet-name>mvc</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
-
 
     <filter>
         <filter-name>encoding</filter-name>

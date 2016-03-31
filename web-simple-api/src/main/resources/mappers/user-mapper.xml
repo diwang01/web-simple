@@ -3,7 +3,7 @@
 <mapper namespace="test">
 
 	<select id="getTest" resultType="com.letv.model.TestBean">
-		select ID,name
+		select id,name
 		from  $[user]$
 	</select>
 </mapper>
